@@ -25,4 +25,8 @@ router.get("/:id", async (req, res) => {
   }
 });
 
+// router.post('/',(req,res)=>{
+//     Project.insert()
+// })
+
 module.exports = router;

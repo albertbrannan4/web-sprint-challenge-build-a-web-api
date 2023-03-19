@@ -12,11 +12,17 @@ router.get("/", async (req, res) => {
   }
 });
 
-// router.get("/:id", async (req, res) => {
-//   try {
-//   } catch (err) {
-//     res.status(500).json({ message: "could not get action" });
-//   }
-// });
+router.get("/:id", async (req, res) => {
+  try {
+    const selectedAction = await Action.get(req.params.id);
+    if (!selectedAction) {
+      res.status(404).json({ message: "action could not be found" });
+    } else {
+      res.status(200).json(selectedAction);
+    }
+  } catch (err) {
+    res.status(500).json({ message: "could not get action" });
+  }
+});
 
 module.exports = router;
