@@ -25,8 +25,56 @@ router.get("/:id", async (req, res) => {
   }
 });
 
-// router.post('/',(req,res)=>{
-//     Project.insert()
-// })
+router.post("/", async (req, res, next) => {
+  const { description, name, completed } = req.body;
+  if (!description || !name) {
+    res.status(400).json("name and description is required");
+  }
+  try {
+    let newPost = await Project.insert({ name, description, completed });
+    res.status(201).json(newPost);
+  } catch (err) {
+    next({ status: 400, message: "project was not created" });
+  }
+});
+
+// router.put("/:id", async (req, res, next) => {
+//   let { description, name, completed } = req.body;
+//   let postExists = await Project.get(req.params.id);
+//   if (!description || !name || !completed) {
+//     res.status(400).json();
+//     next({ status: 400, message: "name and description is required" });
+//   } else if (!postExists) {
+//     next({ status: 404, message: "project does not exist" });
+//   } else {
+//     Project.update(req.params.id, { description, name, completed })
+//       .then((update) => {
+//         res.status(200).json(update);
+//       })
+//       .catch((err) => {
+//         next({ status: 500, message: "nothing was updated" });
+//       });
+//   }
+// });
+
+router.get("/:id/actions", async (req, res, next) => {
+  try {
+    let postExists = await Project.get(req.params.id);
+    if (!postExists) {
+      next({ status: 404, message: "project does not exist" });
+    } else {
+      let projectActions = await Project.getProjectActions(req.params.id);
+      res.status(200).json(projectActions);
+    }
+  } catch (err) {
+    next({ status: 500, message: "actions does not exist" });
+  }
+});
+
+router.use((err, req, res, next) => {
+  res.status(err.status || 500).json({
+    message: err.message,
+  });
+});
 
 module.exports = router;
