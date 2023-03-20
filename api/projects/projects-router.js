@@ -2,7 +2,7 @@
 const express = require("express");
 const router = express.Router();
 const Project = require("./projects-model");
-
+const { validateProjectId } = require("./projects-middleware");
 router.get("/", async (req, res) => {
   try {
     const allProjects = await Project.get();
@@ -12,17 +12,8 @@ router.get("/", async (req, res) => {
   }
 });
 
-router.get("/:id", async (req, res) => {
-  try {
-    const chosenProject = await Project.get(req.params.id);
-    if (!chosenProject) {
-      res.status(404).json({ message: "project not found" });
-    } else {
-      res.status(200).json(chosenProject);
-    }
-  } catch (err) {
-    res.status(500).json({ message: "could not get project" });
-  }
+router.get("/:id", validateProjectId, (req, res) => {
+  res.status(200).json(req.project);
 });
 
 router.post("/", async (req, res, next) => {
@@ -38,51 +29,21 @@ router.post("/", async (req, res, next) => {
   }
 });
 
-// router.put("/:id", async (req, res, next) => {
-//   let { description, name, completed } = req.body;
-//   let postExists = await Project.get(req.params.id);
-//   if (!description || !name || !completed) {
-//     res.status(400).json();
-//     next({ status: 400, message: "name and description is required" });
-//   } else if (!postExists) {
-//     next({ status: 404, message: "project does not exist" });
-//   } else {
-//     Project.update(req.params.id, { description, name, completed })
-//       .then((update) => {
-//         res.status(200).json(update);
-//       })
-//       .catch((err) => {
-//         next({ status: 500, message: "nothing was updated" });
-//       });
-//   }
-// });
+router.put("/:id", validateProjectId, (req, res, next) => {});
 
-router.delete("/:id", async (req, res, next) => {
-  try {
-    let postExists = await Project.get(req.params.id);
-    if (!postExists) {
-      next({ status: 404, message: "project does not exist" });
-    } else {
-      let projectToRemove = await Project.remove(req.params.id);
-      res.json(projectToRemove);
-    }
-  } catch (err) {
-    next({ status: 500, message: "could not delete project" });
-  }
+router.delete("/:id", validateProjectId, async (req, res, next) => {
+  await Project.remove(req.params.id)
+    .then((deleted) => {
+      res.json(deleted);
+    })
+    .catch((err) => {
+      next(err);
+    });
 });
 
-router.get("/:id/actions", async (req, res, next) => {
-  try {
-    let postExists = await Project.get(req.params.id);
-    if (!postExists) {
-      next({ status: 404, message: "project does not exist" });
-    } else {
-      let projectActions = await Project.getProjectActions(req.params.id);
-      res.status(200).json(projectActions);
-    }
-  } catch (err) {
-    next({ status: 500, message: "actions does not exist" });
-  }
+router.get("/:id/actions", validateProjectId, async (req, res) => {
+  let projectActions = await Project.getProjectActions(req.params.id);
+  res.status(200).json(projectActions);
 });
 
 router.use((err, req, res, next) => {
