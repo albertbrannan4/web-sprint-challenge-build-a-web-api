@@ -25,4 +25,28 @@ router.get("/:id", async (req, res) => {
   }
 });
 
+router.post("/", async (req, res, next) => {
+  const { description, notes, completed, project_id } = req.body;
+  if (!description || !notes || !project_id) {
+    res.status(400).json("notes, description, and project_id are required");
+  }
+  try {
+    let newAction = await Action.insert({
+      notes,
+      description,
+      completed,
+      project_id,
+    });
+    res.status(201).json(newAction);
+  } catch (err) {
+    next({ status: 500, message: "action was not created" });
+  }
+});
+
+router.use((err, req, res, next) => {
+  res.status(err.status || 500).json({
+    message: err.message,
+  });
+});
+
 module.exports = router;
