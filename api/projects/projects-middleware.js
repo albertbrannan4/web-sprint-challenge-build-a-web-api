@@ -29,7 +29,7 @@ async function validateProjectBody(req, res, next) {
     if (checkName && checkDescription && completed) {
       req.name = name.trim();
       req.description = description.trim();
-      req.completed = completed.trim();
+      req.completed = completed;
       next();
     } else {
       next({
