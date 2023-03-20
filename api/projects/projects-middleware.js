@@ -15,4 +15,31 @@ async function validateProjectId(req, res, next) {
   }
 }
 
-module.exports = { validateProjectId };
+async function validateProjectBody(req, res, next) {
+  try {
+    const { name, description, completed } = req.body;
+
+    let checkName = name && typeof name === "string" && name.trim().length > 0;
+
+    let checkDescription =
+      description &&
+      typeof description === "string" &&
+      description.trim().length > 0;
+
+    if (checkName && checkDescription && completed) {
+      req.name = name.trim();
+      req.description = description.trim();
+      req.completed = completed.trim();
+      next();
+    } else {
+      next({
+        status: 400,
+        message: "name, description, and completed are required",
+      });
+    }
+  } catch (err) {
+    next(err);
+  }
+}
+
+module.exports = { validateProjectId, validateProjectBody };

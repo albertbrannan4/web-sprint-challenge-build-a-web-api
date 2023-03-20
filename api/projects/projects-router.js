@@ -2,7 +2,11 @@
 const express = require("express");
 const router = express.Router();
 const Project = require("./projects-model");
-const { validateProjectId } = require("./projects-middleware");
+const {
+  validateProjectId,
+  validateProjectBody,
+} = require("./projects-middleware");
+
 router.get("/", async (req, res) => {
   try {
     const allProjects = await Project.get();
@@ -29,7 +33,28 @@ router.post("/", async (req, res, next) => {
   }
 });
 
-router.put("/:id", validateProjectId, (req, res, next) => {});
+router.put(
+  "/:id",
+  validateProjectId,
+  validateProjectBody,
+  async (req, res, next) => {
+    const { name, description, completed } = req;
+
+    // Project.update(req.params.id, { name, description, completed })
+    //   .then((user) => {
+    //     let getUpdate = Project.get(req.params.id);
+    //     res.status(200).json(getUpdate);
+    //   })
+    //   .catch(() => res.status(500).json({ message: "user was not updated" }));
+    try {
+      await Project.update(req.params.id, { name, description, completed });
+      let getUpdate = await Project.get(req.params.id);
+      res.status(200).json(getUpdate);
+    } catch (err) {
+      next(err);
+    }
+  }
+);
 
 router.delete("/:id", validateProjectId, async (req, res, next) => {
   await Project.remove(req.params.id)
