@@ -47,8 +47,12 @@ router.put(
     //   })
     //   .catch(() => res.status(500).json({ message: "user was not updated" }));
     try {
-      await Project.update(req.params.id, { name, description, completed });
-      let getUpdate = await Project.get(req.params.id);
+      let getUpdate = await Project.update(req.params.id, {
+        name,
+        description,
+        completed,
+      });
+
       res.status(200).json(getUpdate);
     } catch (err) {
       next(err);
