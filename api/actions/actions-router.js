@@ -43,6 +43,20 @@ router.post("/", async (req, res, next) => {
   }
 });
 
+router.delete("/:id", async (req, res, next) => {
+  try {
+    let actionExists = await Action.get(req.params.id);
+    if (!actionExists) {
+      next({ status: 404, message: "project does not exist" });
+    } else {
+      let actionToRemove = await Action.remove(req.params.id);
+      res.json(actionToRemove);
+    }
+  } catch (err) {
+    next({ status: 500, message: "could not delete project" });
+  }
+});
+
 router.use((err, req, res, next) => {
   res.status(err.status || 500).json({
     message: err.message,
