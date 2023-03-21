@@ -37,15 +37,15 @@ router.post("/", async (req, res, next) => {
 
 router.put("/:id", validateActionId, async (req, res, next) => {
   const { notes, description, completed, project_id } = req.body;
+  const { id } = req.params;
   try {
-    // let getUpdate = await Action.update({
-    //   notes,
-    //   description,
-    //   completed,
-    //   project_id,
-    // });
-    // res.status(200).json(getUpdate);
-    console.log(notes, description, completed, project_id);
+    let getUpdate = await Action.update(id, {
+      notes,
+      description,
+      completed,
+      project_id,
+    });
+    res.status(200).json(getUpdate);
   } catch (err) {
     next(err);
   }
