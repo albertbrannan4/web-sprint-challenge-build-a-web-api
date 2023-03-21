@@ -3,6 +3,7 @@ const express = require("express");
 const router = express.Router();
 const Action = require("./actions-model");
 
+const { validateActionId } = require("./actions-middlware");
 router.get("/", async (req, res) => {
   try {
     const allActions = await Action.get();
@@ -12,17 +13,8 @@ router.get("/", async (req, res) => {
   }
 });
 
-router.get("/:id", async (req, res) => {
-  try {
-    const selectedAction = await Action.get(req.params.id);
-    if (!selectedAction) {
-      res.status(404).json({ message: "action could not be found" });
-    } else {
-      res.status(200).json(selectedAction);
-    }
-  } catch (err) {
-    res.status(500).json({ message: "could not get action" });
-  }
+router.get("/:id", validateActionId, async (req, res) => {
+  res.status(200).json(req.action);
 });
 
 router.post("/", async (req, res, next) => {
@@ -43,18 +35,30 @@ router.post("/", async (req, res, next) => {
   }
 });
 
-router.delete("/:id", async (req, res, next) => {
+router.put("/:id", validateActionId, async (req, res, next) => {
+  const { notes, description, completed, project_id } = req.body;
   try {
-    let actionExists = await Action.get(req.params.id);
-    if (!actionExists) {
-      next({ status: 404, message: "project does not exist" });
-    } else {
-      let actionToRemove = await Action.remove(req.params.id);
-      res.json(actionToRemove);
-    }
+    // let getUpdate = await Action.update({
+    //   notes,
+    //   description,
+    //   completed,
+    //   project_id,
+    // });
+    // res.status(200).json(getUpdate);
+    console.log(notes, description, completed, project_id);
   } catch (err) {
-    next({ status: 500, message: "could not delete project" });
+    next(err);
   }
+});
+
+router.delete("/:id", validateActionId, async (req, res, next) => {
+  await Action.remove(req.params.id)
+    .then((deleted) => {
+      res.json(deleted);
+    })
+    .catch((err) => {
+      next(err);
+    });
 });
 
 router.use((err, req, res, next) => {

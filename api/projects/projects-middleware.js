@@ -26,7 +26,9 @@ async function validateProjectBody(req, res, next) {
       typeof description === "string" &&
       description.trim().length > 0;
 
-    if (checkName && checkDescription && completed) {
+    let checkCompleted = completed !== undefined;
+
+    if (checkName && checkDescription && checkCompleted) {
       req.name = name.trim();
       req.description = description.trim();
       req.completed = completed;

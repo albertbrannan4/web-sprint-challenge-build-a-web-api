@@ -40,12 +40,6 @@ router.put(
   async (req, res, next) => {
     const { name, description, completed } = req;
 
-    // Project.update(req.params.id, { name, description, completed })
-    //   .then((user) => {
-    //     let getUpdate = Project.get(req.params.id);
-    //     res.status(200).json(getUpdate);
-    //   })
-    //   .catch(() => res.status(500).json({ message: "user was not updated" }));
     try {
       let getUpdate = await Project.update(req.params.id, {
         name,
